@@ -1,0 +1,115 @@
+{% extends 'cards/base_template.html' %}
+
+{% block title %}
+    Card detail
+{% endblock %}
+
+{% block content %}
+    <h1>Інформація по карті: {{ card.card_number }}</h1>
+
+    <form action="{% url 'card_detail_url' card_number=card.card_number %}" method="post">
+        {% csrf_token %}
+        <ul class="list-group list-group-numbered">
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">Айді карти в бд</div>
+                {{ card.id }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">Серійний номер</div>
+                {{ card.serial_number }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">Номер карти</div>
+                {{ card.card_number }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">Дата випуску</div>
+                {{ card.release_date }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">Дата закінчення активності</div>
+                {{ card.activity_end_date }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">CVV код</div>
+                {{ card.cvv_code }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">Баланс карти</div>
+                {{ card.balance }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">Статус</div>
+{#                {{ card.card_status }}#}
+                <select name="status" class="my_field">
+                    <option value="Активована" {% if card.card_status == 'Активована' %} selected="selected" {% endif %}>Активована</option>
+                    <option value="Не активована" {% if card.card_status == 'Не активована' %} selected="selected" {% endif %}>Не активована</option>
+                    <option value="Просрочена" {% if card.card_status == 'Просрочена' %} selected="selected" {% endif %}>Просрочена</option>
+                </select>
+            </div>
+          </li>
+        </ul>
+        <div class="buttons-container d-flex justify-content-between mt-3">
+            <button type="submit" class="btn btn-primary" name="save">Зберегти</button>
+            <button type="submit" class="btn btn-danger" name="delete">Видалити</button>
+        </div>
+    </form>
+
+    <div class="check">
+        {% for check in checks %}
+            {% with 0 as total_cost %}
+                <div class="check_header d-flex justify-content-between mt-5 mb-1">
+                    <h2 class="check_date">{{ check.date_of_purchase }}</h2>
+                    <h2 class="check_id">{{ check.identifier }}</h2>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Назва товару</th>
+                      <th scope="col">Ціна</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      {% for product in products %}
+                        {% if product.check_id_id == check.id %}
+                            <tr>
+                                <th scope="row">{{ product.id }}</th>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.cost }}</td>
+                            </tr>
+                        {% endif %}
+                      {% endfor %}
+                  </tbody>
+                </table>
+                <div class="total_cost d-flex justify-content-between">
+                    <h4>Загальна сумма в чеку: </h4>
+                    <h4>{{ check.total_cost }}</h4>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <script>alert('{{ message }}')</script>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

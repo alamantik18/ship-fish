@@ -1,0 +1,92 @@
+{% extends 'cards/base_template.html' %}
+
+{% block title %}
+    Information Card System
+{% endblock %}
+
+{% block form %}
+    <h3 class="d-block">Форма для генерації карток: </h3>
+    <form action="{% url 'cars_list_url' %}" method="post" class="generator__form mb-3">
+        {% csrf_token %}
+        {% for field in form %}
+            <div>
+                {{ field.label }}
+                {{ field }}
+                {% if field.errors %}
+                        {{ field.errors }}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <input type="submit" value="Generate" class="btn btn-light" name="create_cards">
+    </form>
+{% endblock %}
+
+{% block content %}
+    {% if page_object %}
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Серія</th>
+              <th scope="col">Номер карти</th>
+              <th scope="col">Дата випуску</th>
+              <th scope="col">Дата закінчення активності</th>
+              <th scope="col">Статус</th>
+              <th scope="col">Видалити</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for card in page_object.object_list %}
+                <tr>
+                    <th scope="row" onclick="window.location.href='{{ card.get_absolute_url }}'; return false">{{ card.id }}</th>
+                    <td onclick="window.location.href='{{ card.get_absolute_url }}'; return false">{{ card.serial_number }}</td>
+                    <td onclick="window.location.href='{{ card.get_absolute_url }}'; return false">{{ card.card_number }}</td>
+                    <td onclick="window.location.href='{{ card.get_absolute_url }}'; return false">{{ card.release_date }}</td>
+                    <td onclick="window.location.href='{{ card.get_absolute_url }}'; return false">{{ card.activity_end_date }}</td>
+                    <td onclick="window.location.href='{{ card.get_absolute_url }}'; return false">{{ card.card_status }}</td>
+                    <td>
+                        <form action="{% url 'cars_list_url' %}" method="post">
+                            {% csrf_token %}
+                            <button type="Submit" class="btn btn-danger" name="delete-card" value="{{ card.card_number }}">Видалити</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if is_paginated %}
+            <nav aria-label="...">
+              <ul class="pagination">
+                <li class="page-item {% if not prev_url %} disabled {% endif %}">
+                  <a class="page-link" href="{{ prev_url }}">Previous</a>
+                </li>
+
+                  {% for n in page_object.paginator.page_range %}
+                      {% if page_object.number == n %}
+                        <li class="page-item active" aria-current="page">
+                          <a class="page-link" href="?page={{ n }}">{{ n }}</a>
+                        </li>
+                      {% elif n > page_object.number|add:-3 and n < page_object.number|add:3 %}
+                          <li class="page-item"><a class="page-link" href="?page={{ n }}">{{ n }}</a></li>
+                      {% endif %}
+                  {% endfor %}
+
+                <li class="page-item {% if not next_url %} disabled {% endif %}">
+                  <a class="page-link" href="{{ next_url }}">Next</a>
+                </li>
+              </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <p>Информация про карточки отсутствует</p>
+    {% endif %}
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <script>alert('{{ message }}')</script>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
