@@ -26,7 +26,7 @@ def cards_list(request):
     if request.method == 'POST' and 'create_cards' in request.POST:
         form = CardForm(request.POST)
         if form.is_valid():
-            card_statuses = ['Не активована', 'Активована', 'Просрочена']
+            card_statuses = ['Не активована', 'Активована']
 
             objs_cards = [
                 Card(
@@ -56,7 +56,7 @@ def cards_list(request):
     now = datetime.datetime.now()
     for card in Card.objects.all():
         if now > card.activity_end_date:
-            card.delete()
+            Card.objects.filter(card_number=card.card_number).update(card_status='Просрочена')
 
     cards = Card.objects.filter(
         Q(serial_number__icontains=search_query) |
